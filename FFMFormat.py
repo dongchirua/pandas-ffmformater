@@ -1,7 +1,8 @@
+from collections import defaultdict
+
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from collections import defaultdict
 
 
 def generate_chunks(iterable, step=1):
@@ -11,7 +12,8 @@ def generate_chunks(iterable, step=1):
 
 
 class FFMformatter:
-    def __init__(self, categorical_columns=None, numerical_columns=None, key_column='id', label_column='label', step=50):
+    def __init__(self, categorical_columns=None, numerical_columns=None, key_column='id', label_column='label',
+                 step=50):
         self.categorical = categorical_columns
         self.numerical = numerical_columns
         self.key_column = key_column
@@ -60,7 +62,10 @@ class FFMformatter:
         batches = list(generate_chunks(range(len(df)), self.step))
         for i in tqdm(batches, total=len(batches)):
             self.fit(df.iloc[i], target[i])
-        return pd.Series(self.result).reset_index()
+
+        ffm_df = pd.Series(self.result).reset_index()
+        ffm_df.columns = [self.key_column, "ffm_text"]
+        return ffm_df
 
     def __add_ids(self, keys: np.ndarray, targets: np.ndarray = None):
         """
